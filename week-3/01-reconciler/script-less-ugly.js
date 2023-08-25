@@ -1,16 +1,20 @@
+  // the reason why it's still expensive is bc the thing you're comparing to is the thing already present in the dom,
+  // the dom has a bunch of elements, u at the very top called the document.getElementById("mainArea"), u bring the whole dom here 
+  // and that's very expensive WHICH IS WHY WE INTRODUCED "VIRTUAL DOM"
 
 function createDomElements(data) {
+
   var parentElement = document.getElementById("mainArea");
 
   // Get the current children of the parent element and convert it to an array
   var currentChildren = Array.from(parentElement.children);
-
+  console.log(currentChildren);
   let added = 0, deleted = 0, updated = 0;
   // Process each item in the data array
   data.forEach(function(item) {
     // Check if a child with this ID already exists
     var existingChild = currentChildren.find(function(child) {
-      return child.dataset.id === String(item.id);
+      return child.getAttribute("id")=== String(item.id);
     });
 
     if (existingChild) {
@@ -19,14 +23,15 @@ function createDomElements(data) {
       existingChild.children[0].innerHTML = item.title;
       existingChild.children[1].innerHTML = item.description;
       // Remove it from the currentChildren array
-      currentChildren = currentChildren.filter(function(child) {
-        return child !== existingChild;
-      });
+      // currentChildren = currentChildren.filter(function(child) {
+      //   return child !== existingChild;
+      // });
     } else {
       added++;
       // If it doesn't exist, create it
       var childElement = document.createElement("div");
-      childElement.dataset.id = item.id; // Store the ID on the element for future lookups
+      // childElement.dataset.id = item.id; 
+      childElement.setAttribute("id",item.id)// Store the ID on the element for future lookups
 
       var grandChildElement1 = document.createElement("span");
       grandChildElement1.innerHTML = item.title
@@ -46,9 +51,19 @@ function createDomElements(data) {
   });
 
   // Any children left in the currentChildren array no longer exist in the data, so remove them
+  // currentChildren.forEach(function(child) {
+  //   deleted++;
+  //   parentElement.removeChild(child);
+  // });
+
   currentChildren.forEach(function(child) {
-    deleted++;
-    parentElement.removeChild(child);
+    var stillPresent = data.find(function(item){
+      return child.getAttribute("id") === String(item.id);
+    });
+    if(!stillPresent){
+      deleted++;
+      parentElement.removeChild(child);
+    }
   });
 
   console.log(added);
@@ -69,3 +84,4 @@ window.setInterval(() => {
 
   createDomElements(todos)
 }, 5000)
+
